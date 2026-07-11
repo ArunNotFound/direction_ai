@@ -19,28 +19,28 @@ For GSTFlow testing, you want a **comprehensive fixture matrix**, not just B2B a
 # 1. B2B (Business to Business)
 
 ```text
-✓ Normal Tax Invoice
-✓ Interstate B2B
-✓ Intrastate B2B
-✓ SEZ with LUT/Bond
-✓ SEZ with IGST
-✓ Export with LUT
-✓ Export with IGST
-✓ Deemed Export
-✓ Reverse Charge (RCM)
-✓ Bill-to / Ship-to
-✓ Mixed GST Rates
-✓ Nil-rated Items
-✓ Exempt Items
-✓ Non-GST Items
-✓ Zero-rated Supply
-✓ Composite Supply
-✓ Mixed Supply
-✓ E-invoice applicable
-✓ E-invoice not applicable
-✓ Invoice with Cess
-✓ Invoice without Cess
-✓ Foreign Currency Invoice
+✓ [SUPPORTED] Normal Tax Invoice
+✓ [SUPPORTED] Interstate B2B
+✓ [SUPPORTED] Intrastate B2B
+✓ [UNSUPPORTED] SEZ with LUT/Bond
+✓ [UNSUPPORTED] SEZ with IGST
+✓ [UNSUPPORTED] Export with LUT
+✓ [UNSUPPORTED] Export with IGST
+✓ [UNSUPPORTED] Deemed Export
+✓ [SUPPORTED] Reverse Charge (RCM)
+✓ [UNSUPPORTED] Bill-to / Ship-to
+✓ [SUPPORTED] Mixed GST Rates
+✓ [SUPPORTED] Nil-rated Items
+✓ [SUPPORTED] Exempt Items
+✓ [UNSUPPORTED] Non-GST Items
+✓ [SUPPORTED] Zero-rated Supply
+✓ [UNSUPPORTED] Composite Supply
+✓ [UNSUPPORTED] Mixed Supply
+✓ [LIMITED] E-invoice applicable (Format only)
+✓ [SUPPORTED] E-invoice not applicable
+✓ [SUPPORTED] Invoice with Cess
+✓ [SUPPORTED] Invoice without Cess
+✓ [UNSUPPORTED] Foreign Currency Invoice
 ```
 
 ---
@@ -48,20 +48,20 @@ For GSTFlow testing, you want a **comprehensive fixture matrix**, not just B2B a
 # 2. B2C (Business to Consumer)
 
 ```text
-✓ B2C Small
-✓ B2C Large
-✓ Interstate
-✓ Intrastate
-✓ With Place of Supply
-✓ Without Place of Supply
-✓ Nil-rated
-✓ Exempt
-✓ Non-GST
-✓ Mixed Rates
-✓ Cess
-✓ Digital Goods
-✓ Services
-✓ Goods
+✓ [SUPPORTED] B2C Small
+✓ [SUPPORTED] B2C Large
+✓ [SUPPORTED] Interstate
+✓ [SUPPORTED] Intrastate
+✓ [SUPPORTED] With Place of Supply
+✓ [SUPPORTED] Without Place of Supply (Flags POS warning)
+✓ [SUPPORTED] Nil-rated
+✓ [SUPPORTED] Exempt
+✓ [UNSUPPORTED] Non-GST
+✓ [SUPPORTED] Mixed Rates
+✓ [SUPPORTED] Cess
+✓ [UNSUPPORTED] Digital Goods (Specific POS logic missing)
+✓ [SUPPORTED] Services
+✓ [SUPPORTED] Goods
 ```
 
 ---
@@ -69,14 +69,14 @@ For GSTFlow testing, you want a **comprehensive fixture matrix**, not just B2B a
 # 3. Credit Notes (CRN)
 
 ```text
-✓ B2B Credit Note
-✓ B2C Credit Note
-✓ Partial Credit
-✓ Full Credit
-✓ Linked Invoice
-✓ Missing Original Invoice
-✓ Tax Reduction
-✓ Quantity Reduction
+✓ [LIMITED] B2B Credit Note (Only checks DOC_TYPE & Ref)
+✓ [LIMITED] B2C Credit Note
+✓ [UNSUPPORTED] Partial Credit
+✓ [UNSUPPORTED] Full Credit
+✓ [SUPPORTED] Linked Invoice (CDN_ORIGINAL_INV rule)
+✓ [SUPPORTED] Missing Original Invoice
+✓ [UNSUPPORTED] Tax Reduction logic
+✓ [UNSUPPORTED] Quantity Reduction logic
 ```
 
 ---
@@ -84,12 +84,12 @@ For GSTFlow testing, you want a **comprehensive fixture matrix**, not just B2B a
 # 4. Debit Notes (DBN)
 
 ```text
-✓ B2B Debit Note
-✓ B2C Debit Note
-✓ Linked Invoice
-✓ Missing Reference
-✓ Tax Increase
-✓ Price Increase
+✓ [LIMITED] B2B Debit Note
+✓ [LIMITED] B2C Debit Note
+✓ [SUPPORTED] Linked Invoice
+✓ [SUPPORTED] Missing Reference (CDN_ORIGINAL_INV rule)
+✓ [UNSUPPORTED] Tax Increase logic
+✓ [UNSUPPORTED] Price Increase logic
 ```
 
 ---
@@ -97,17 +97,17 @@ For GSTFlow testing, you want a **comprehensive fixture matrix**, not just B2B a
 # 5. Special GST Supplies
 
 ```text
-✓ Export
-✓ Import
-✓ SEZ Supply
-✓ SEZ Receipt
-✓ Deemed Export
-✓ Reverse Charge
-✓ Job Work
-✓ Branch Transfer
-✓ Stock Transfer
-✓ High Sea Sale
-✓ Merchant Export
+✓ [UNSUPPORTED] Export
+✓ [UNSUPPORTED] Import
+✓ [UNSUPPORTED] SEZ Supply
+✓ [UNSUPPORTED] SEZ Receipt
+✓ [UNSUPPORTED] Deemed Export
+✓ [SUPPORTED] Reverse Charge
+✓ [UNSUPPORTED] Job Work
+✓ [UNSUPPORTED] Branch Transfer
+✓ [UNSUPPORTED] Stock Transfer
+✓ [UNSUPPORTED] High Sea Sale
+✓ [UNSUPPORTED] Merchant Export
 ```
 
 ---
@@ -115,16 +115,16 @@ For GSTFlow testing, you want a **comprehensive fixture matrix**, not just B2B a
 # 6. Tax Scenarios
 
 ```text
-✓ IGST
-✓ CGST + SGST
-✓ UTGST
-✓ Compensation Cess
-✓ Zero Tax
-✓ Mixed Tax Rates
-✓ Wrong Tax Split
-✓ Wrong Tax Rate
-✓ Missing Tax
-✓ Excess Tax
+✓ [SUPPORTED] IGST
+✓ [SUPPORTED] CGST + SGST
+✓ [UNSUPPORTED] UTGST
+✓ [SUPPORTED] Compensation Cess
+✓ [SUPPORTED] Zero Tax
+✓ [SUPPORTED] Mixed Tax Rates
+✓ [SUPPORTED] Wrong Tax Split (TAX_AMOUNT rule)
+✓ [SUPPORTED] Wrong Tax Rate (RATE_SLAB rule)
+✓ [SUPPORTED] Missing Tax
+✓ [SUPPORTED] Excess Tax
 ```
 
 ---
@@ -132,13 +132,13 @@ For GSTFlow testing, you want a **comprehensive fixture matrix**, not just B2B a
 # 7. GST Registration Scenarios
 
 ```text
-✓ Registered Buyer
-✓ Unregistered Buyer
-✓ Composition Dealer
-✓ Casual Taxpayer
-✓ Non-resident Taxpayer
-✓ Government Department
-✓ Embassy
+✓ [SUPPORTED] Registered Buyer
+✓ [SUPPORTED] Unregistered Buyer
+✓ [UNSUPPORTED] Composition Dealer
+✓ [UNSUPPORTED] Casual Taxpayer
+✓ [UNSUPPORTED] Non-resident Taxpayer
+✓ [UNSUPPORTED] Government Department
+✓ [UNSUPPORTED] Embassy
 ```
 
 ---
@@ -146,14 +146,14 @@ For GSTFlow testing, you want a **comprehensive fixture matrix**, not just B2B a
 # 8. Invoice Lifecycle
 
 ```text
-✓ Draft
-✓ Issued
-✓ Cancelled
-✓ Amended
-✓ Revised
-✓ Duplicate
-✓ Missing Number
-✓ Out-of-sequence Number
+✓ [SUPPORTED] Draft (Treated as standard document)
+✓ [SUPPORTED] Issued
+✓ [UNSUPPORTED] Cancelled
+✓ [UNSUPPORTED] Amended
+✓ [UNSUPPORTED] Revised
+✓ [UNSUPPORTED] Duplicate
+✓ [UNSUPPORTED] Missing Number (Sequence tracking)
+✓ [UNSUPPORTED] Out-of-sequence Number
 ```
 
 ---
@@ -161,19 +161,19 @@ For GSTFlow testing, you want a **comprehensive fixture matrix**, not just B2B a
 # 9. Validation Edge Cases
 
 ```text
-✓ Invalid GSTIN
-✓ Invalid HSN
-✓ Invalid SAC
-✓ Invalid State Code
-✓ Wrong Place of Supply
-✓ Wrong Invoice Date
-✓ Future Date
-✓ Invalid Financial Year
-✓ Negative Amount
-✓ Zero Amount
-✓ Decimal Rounding
-✓ Duplicate Invoice
-✓ Missing Mandatory Field
+✓ [SUPPORTED] Invalid GSTIN
+✓ [SUPPORTED] Invalid HSN
+✓ [SUPPORTED] Invalid SAC
+✓ [SUPPORTED] Invalid State Code
+✓ [SUPPORTED] Wrong Place of Supply
+✓ [SUPPORTED] Wrong Invoice Date
+✓ [UNSUPPORTED] Future Date
+✓ [UNSUPPORTED] Invalid Financial Year
+✓ [SUPPORTED] Negative Amount
+✓ [SUPPORTED] Zero Amount
+✓ [SUPPORTED] Decimal Rounding (SEC_170_ROUNDING)
+✓ [UNSUPPORTED] Duplicate Invoice
+✓ [SUPPORTED] Missing Mandatory Field
 ```
 
 ---
@@ -183,18 +183,18 @@ For GSTFlow testing, you want a **comprehensive fixture matrix**, not just B2B a
 These determine where an invoice would typically be reported.
 
 ```text
-✓ B2B
-✓ B2CL
-✓ B2CS
-✓ Export
-✓ SEZ
-✓ Deemed Export
-✓ Credit Note
-✓ Debit Note
-✓ Nil Rated
-✓ Exempt
-✓ Non-GST
-✓ HSN Summary
+✓ [SUPPORTED] B2B
+✓ [SUPPORTED] B2CL
+✓ [SUPPORTED] B2CS
+✓ [UNSUPPORTED] Export
+✓ [UNSUPPORTED] SEZ
+✓ [UNSUPPORTED] Deemed Export
+✓ [SUPPORTED] Credit Note
+✓ [SUPPORTED] Debit Note
+✓ [SUPPORTED] Nil Rated
+✓ [SUPPORTED] Exempt
+✓ [UNSUPPORTED] Non-GST
+✓ [UNSUPPORTED] HSN Summary
 ```
 
 ---
@@ -202,15 +202,13 @@ These determine where an invoice would typically be reported.
 # 11. Document Types
 
 ```text
-✓ Tax Invoice
-✓ Credit Note
-✓ Debit Note
-✓ Revised Invoice
-✓ Bill of Supply
-✓ Receipt Voucher
-✓ Refund Voucher
-✓ Payment Voucher
-✓ Delivery Challan
+✓ [SUPPORTED] Tax Invoice
+✓ [SUPPORTED] Credit Note
+✓ [SUPPORTED] Debit Note
+✓ [UNSUPPORTED] Revised Invoice
+✓ [UNSUPPORTED] Bill of Supply
+✓ [UNSUPPORTED] Receipt Voucher
+✓ [UNSUPPORTED] Refund Voucher
+✓ [UNSUPPORTED] Payment Voucher
+✓ [UNSUPPORTED] Delivery Challan
 ```
-
-
