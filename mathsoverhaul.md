@@ -226,3 +226,227 @@ tool on their own document and found the verdict right.
 **The whole algebra evaluates to one unfinished term.**
 Every equation here is satisfiable by code except the last, and the last
 one dominates. Solve it first.
+
+---
+
+## 10 · THE UPDATE LAW  (compiled engine ⊕ signed packs)
+
+### 10.1 · The apparent problem
+```
+Gazette(t) : rate(HSN_x) : 12% → 18%   at midnight
+Engine ∈ {AOT, Wasm}                    ⇒ compiled
+∴ naive conclusion:  rule change ⇒ recompile + retest + redeploy
+```
+The tempting answer is a dynamic BRE fetching rules from an API at runtime.
+**That answer is forbidden**, and not for purity — for correctness:
+
+```
+BRE:      rules(t) mutable at runtime
+∴         replay(doc, t₀) ≠ replay(doc, t₁)
+∴         REPLAY LAW BROKEN
+```
+A verdict that cannot be reproduced years later is worthless in a dispute.
+Determinism is not a cost of compilation — determinism *is* compilation.
+
+### 10.2 · The decomposition (the actual answer)
+```
+Rule  =  Law ⊗ Params
+
+Law     : structural, algebraic, changes ~never
+          (checksum algebra · tax-split invariant · sum-consistency ·
+           envelope integrity · document-class semantics)
+Params  : tabular, dated, changes often
+          (rate tables · HSN→rate maps · state codes · effective dates ·
+           ISO-4217 · UNCL5305 · UOM lists · IRP public keys)
+
+∴  K  =  K_law  ⊕  K_params
+
+    K_law    ⊂  binary   (compiled: AOT + Wasm)
+    K_params ⊂  pack     (signed data file, loaded at runtime)
+```
+**A rate change 12%→18% is a Params change, not a Law change.**
+It requires a new pack. It does NOT require recompilation.
+
+### 10.3 · The Pack Law
+```
+Pack  =  ⟨ id, version, effectiveFrom, data, signature ⟩
+
+∀ pack :  Data(pack) ∧ ¬Code(pack)          ← packs are DATA, never CODE
+          Verify_Ed25519(pack) ∨ Reject(pack)
+          ¬Network(load)                     ← packs arrive as FILES
+```
+Distribution = human channels (a CA downloads once, forwards to fifty
+clients on WhatsApp; a USB stick; an app-store update). The engine never
+calls a server. The signature is the trust; the file is the transport.
+
+**Forbidden inside a pack** (this is the BRE line, and it is absolute):
+```
+✗ executable logic    ✗ scripting/DSL    ✗ arbitrary predicates
+✗ anything Turing-complete
+```
+A pack that can *compute* is a remote-code-execution channel into an
+offline trust product. Packs declare facts; the compiled Law evaluates them.
+
+### 10.4 · The Pinned-Context Determinism Law  (supersedes naïve replay)
+```
+verify :  Document → EngineVersion → PackVersion → EffectiveDate → Verdict
+
+∀ (d, e, p, t) :  verify(d, e, p, t)  is constant  ∀ wall-clock
+```
+The envelope RECORDS all four. Replay is exact forever, *because* the
+parameters were pinned rather than fetched.
+
+```
+GST:  pack = { rates, HSN map, state codes, IRP keys }
+EDI:  pack = { ISO-4217, UNCL5305, UOM, profile version, schematron digest }
+```
+Identical law, two domains — therefore `PackLoader ∈ CF`, `PackContents ∈ K`.
+(Extraction Rule §3 applies: the loader is generic; the tables are domain.)
+
+### 10.5 · Staleness Honesty
+```
+∀ verdict :  emit(PackVersion, PackEffectiveFrom)
+             stale(pack, now)  ⇒  Warn("rules as of {date}; a newer pack may exist")
+```
+The engine never pretends currency it cannot verify. An offline tool that
+*says* how fresh it is beats an online tool that silently changes under you.
+
+### 10.6 · What DOES require recompilation (stated honestly)
+```
+new rule TYPE          ⇒ recompile      (a new law)
+new document CLASS     ⇒ recompile      (new semantics)
+changed algebra        ⇒ recompile      (rare; e.g. rounding statute rewrite)
+rate/code/date change  ⇒ PACK ONLY      ← the 95% case
+```
+The honest claim is not "never recompile." It is:
+**"parametric change never recompiles; structural change does — and structural
+change is rare, reviewable, and testable."**
+
+### 10.7 · Cost
+```
+before:  Δrate  =  recompile + retest + redeploy(all modes)
+after:   Δrate  =  sign(pack) + distribute(file)
+
+before:  ΔH increases with every hardcoded table
+after:   ΔH ≤ 0        (tables leave the code; the code keeps only laws)
+```
+The Update Law therefore *satisfies* the Entropy Law §6, rather than
+violating it. Hardcoded rates were entropy. Packs are the reduction.
+
+---
+
+## 11 · THE INTAKE LAW  (external contracts → CanonicalIR)
+
+### 11.1 · The third arrow
+```
+introspect : DB       → IR        (exists, proven)
+emit       : IR       → Targets   (Postgres-A powered)
+intake     : Contract → IR        (this law)
+
+I : S → A
+S = { JSONSchema, OpenAPI, JSON-sample }          ← embraced, in order
+S̄ = { d.ts, XSD }                                 ← deferred, wake-conditioned
+A = F ⊕ J ⊕ K ⊕ T ⊕ R
+    F# Types ⊕ Thoth Codecs ⊕ Adapter Skeleton ⊕ Contract Tests ⊕ Fidelity Report
+```
+
+### 11.2 · Trust Law  (the differentiator — this is not quicktype)
+```
+Generator ≠ Proof
+TrustedAdapter = GeneratedAdapter ⊕ ContractTests ⊕ FidelityReport
+```
+Prior art (openapi-generator, quicktype, FSharp.Data) ships code and hope.
+CanonIntake ships code, the tests that hold it, and the honest account of
+what it could not know. Also: type providers ∉ Fable — source-file emission
+serves the dual-runtime law where compile-time magic cannot.
+
+### 11.3 · Uncertainty Law
+```
+UnknownSemantics(s) > 0  ⇒  Fidelity(I(s)) ≠ Exact
+
+JSONSchema : Fidelity may reach Exact      (constraints are declared)
+OpenAPI    : mostly Exact                  (JSONSchema inside)
+JSON-sample: Unknown-tinted by construction (a sample is not a schema)
+```
+Schema constraints (min/max/pattern/enum/required) lift into the lattice as
+refinements — intake IS introspect-for-documents.
+
+### 11.4 · Boundary & Round-trip Laws
+```
+ExternalContract → RawType → Normalize → CanonicalIR → Verdict
+decode(encode(x)) ≅ x                      (law-tested per adapter)
+∀ generated line : Provenance(line) ≠ ∅    (cites source schema path)
+```
+
+### 11.5 · Placement  (§3 applies)
+```
+IntakeEngine ∈ CF          (generic: schema → lattice lifting)
+AdapterBody  ∈ Flow(K)     (domain owns the meaning; skeletons rot —
+                            generate the interface + tests, humans own flesh)
+```
+
+### 11.6 · First falsifier  (internal, conservative, this month)
+```
+INV-01 (official GSTN e-invoice JSON Schema)
+   → I(INV-01) → RawInvoice'
+diff(RawInvoice', RawInvoice_handwritten)
+   = bugs ∨ documented deviations          (both are wins)
+```
+CanonIntake's first consumer is GSTFlow itself. No new product surface.
+
+### 11.7 · Deferred set, on the record
+```
+d.ts : wakes on a real user request        (semantically thin, big parse lift)
+XSD  : wakes with EDIFlow unfreeze          (UBL is XSD-defined — EDIFlow.Ubl
+                                             could be GENERATED; subset-XSD only)
+```
+
+---
+
+## 12 · THE DEPENDENCY LAW  (final sweep before freeze)
+
+### 12.1 · The razor
+```
+∀ lib ∈ VerdictPath :  Fable(lib) ∧ NativeAOT(lib) ∧ ¬Network(lib)
+∀ lib anywhere     :  ΔH(lib) ≤ 0     (must remove more complexity than it adds)
+```
+
+### 12.2 · The allowlist (vetted, frozen)
+```
+CORE (verdict path — dual-target):
+  Thoth.Json                 serialization law (only dual-target option)
+  FsToolkit.ErrorHandling    result/validation CEs — Fable ✓, zero-cost
+  FSharp.UMX                 erased units for primitives — string<gstin>,
+                             decimal<inr>; types-as-proofs at zero cost
+TEST:
+  FsCheck                    the proof engine (laws = properties)
+CLI PRESENTATION ONLY (never oracle output):
+  Spectre.Console            human-rendered tables for the CA demo;
+                             canonical JSON untouched
+DEV TOOLING:
+  Fantomas                   style law, mechanically enforced in CI
+```
+
+### 12.3 · The refusals (recorded with reasons)
+```
+FParsec        ✗ ∉ Fable — breaks One-Engine at the parser. X12 parsing =
+                 hand-rolled ~100-line combinators in shared core.
+Validus        ✗ second validation vocabulary; RuleResult is richer (ΔH > 0)
+NodaTime       ✗ ∉ Fable; civil dates need DateOnly + ISO only.
+                 (Fiscal-year Apr–Mar = 20-line domain module, not a dep.)
+FSharpPlus     ✗ abstraction without proof; plain F# suffices
+FSharp.Data    ✗ type providers ∉ Fable (already ruled, §11.2)
+FsLexYacc      ✗ generator overkill; ∉ Fable
+Argu           ~ philosophically perfect, reflection-based (AOT risk);
+                 hand-rolled args stay; revisit if CLI verbs multiply
+Expecto        ~ nicer than xunit; migration = ΔH > 0 for aesthetics; stay
+```
+
+### 12.4 · Freeze
+The trinity dependency surface is now CLOSED. Any future addition must pass
+§12.1 and be recorded here with its proof. The strongest finding of the
+final sweep: FSharp.UMX — the philosophy of this project available as an
+erased type, for free. The strongest confirmation: everything essential was
+already in hand. The ecosystem check found two gems and no missing pillar —
+the trinity was not reinventing the world; it was refusing the parts of the
+world that break its laws.
