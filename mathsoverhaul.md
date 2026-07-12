@@ -56,13 +56,18 @@ EDI ∩ CF   = Engine
   EDI = CF ⊕ EDI
 ```
 
-**Current state (measured 2026-07-11): the law is VIOLATED.**
-`VerdictEnvelope` exists twice — `GSTFlow.Core.Verification` and
-`EDIFlow.Core.Verification` — and the copies have **already diverged**
-(EDIFlow's encoder silently drops `Parameters`, `EffectiveFrom`,
-`EffectiveUntil`, `Reference`; GSTFlow's does not). Duplication has
-produced drift in under one week. `GST ∩ EDI = ∅` is currently false.
-Restoring it is the sole purpose of the refactor in §7.
+**Historical state (measured 2026-07-11): the law was VIOLATED.**
+`VerdictEnvelope` existed twice — `GSTFlow.Core.Verification` and
+`EDIFlow.Core.Verification` — and the copies had **already diverged**
+(EDIFlow's encoder silently dropped `Parameters`, `EffectiveFrom`,
+`EffectiveUntil`, `Reference`; GSTFlow's did not). Duplication had
+produced drift in under one week. `GST ∩ EDI = ∅` was false.
+Restoring it was the sole purpose of the refactor in §7.
+
+**Current state (measured 2026-07-12): the law is RESTORED.**
+- Verification extraction is complete (`CanonFlow.Core` contains the pure reasoning kernel).
+- GSTFlow and EDIFlow package migration is complete (both reference `CanonFlow.Core.0.1.0-alpha` via NuGet, relative sibling paths eradicated).
+- Constitutional conformance continues (Falsifier logs, Contact proof).
 
 ---
 

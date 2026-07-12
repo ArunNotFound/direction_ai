@@ -1,0 +1,8 @@
+{
+  "canonflow": "93ba7a4733f848e0b453165bf749329140b5c5d9/CanonFlow.Core.0.1.0-alpha.nupkg",
+  "gstflow": "32dc4fa76101a9839a084cfb0e1f3324ae9e4289",
+  "ediflow": "72f007b657fee9f9248173d871232cbf4661de08",
+  "tests": "pass",
+  "agreement": "pass",
+  "contact": "CONTACT-001"
+}
