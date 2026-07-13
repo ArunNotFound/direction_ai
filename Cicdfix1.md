@@ -1,105 +1,59 @@
-### Diagnosis: The NativeAOT "Reflection Trap" & The Playwright Drift
+# GSTFlow — GitHub Actions Run 29235791438: Fixes
 
-I have analyzed the failure logs for run `29234546991` (Commit `c3c6b33`). The pipeline is failing across three fronts (Windows, Android, Web), but they all stem from **two root causes**: the NativeAOT JSON serialization trap and a resulting JSON casing mismatch that broke your Playwright Agreement Tests.
+**Run:** [Build Flutter Apps (APK & EXE)](https://github.com/CanonFlowFoundation/GSTFlow/actions/runs/29235791438)  
+**Head commit reviewed:** `51c900c`  
+**Status:** Fix set prepared locally; commit, push, and rerun the workflow to verify on GitHub-hosted runners.
 
-Here is the exact blueprint to turn this pipeline green.
+## What failed
 
----
+| Job | Failure path | Root cause |
+| --- | --- | --- |
+| Build Android APK | Flutter test/build | The Flutter parser passed five arguments to generated `TaxAmount`, which accepts four. The test fixture also used an invalid buyer GSTIN checksum. |
+| Build Windows EXE | Flutter test/build | A clean runner did not generate the Fable Dart runtime (`fable_modules`) required by Flutter imports. |
+| Test Web Gateway (Playwright) | Playwright test | A clean runner did not generate the Fable TypeScript runtime. The test additionally clicked a nonexistent `Raw JSON` button. |
 
-### 1. The Core Failure: NativeAOT JSON Reflection (Windows & Android)
-**The Error:**
-`Build Windows EXE` and `Build Android APK` failed. The compiler explicitly flagged:
-> `GSTFlow.Native/NativeInterface.cs#L53: Using member 'System.Text.Json.JsonSerializer.Serialize<TValue>' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling.`
+## Applied fixes
 
-**The Cause:**
-In your push to adopt NativeAOT for the CLI/FFI boundary, you used the standard `JsonSerializer.Serialize(verdict, options)`. When `PublishAot=true` is enabled, the .NET compiler **strips out all reflection metadata** to shrink the binary size. Standard JSON serialization relies on reflection to read property names at runtime. Because the metadata is gone, the AOT compiler either fails the build or the resulting `.exe`/`.so` crashes instantly at runtime.
+### Flutter correctness
 
-**The Fix: Implement a JSON Source Generator**
-You must replace reflection-based serialization with **compile-time Source Generators**. 
+- Removed the obsolete `StateCess` argument in `flutter_app/lib/invoice_parser.dart`; generated `TaxAmount` takes only `Igst`, `Cgst`, `Sgst`, and `Cess`.
+- Replaced the invalid test GSTIN `29PQRSX9876L1ZV` with checksum-valid `29AAGCB7383J1Z4`.
+- Added `crypto: ^3.0.3` as a direct Flutter dependency because the app and tests import it directly.
 
-Open `GSTFlow.Native/NativeInterface.cs` and apply this fix:
+### Reproducible Fable generation
 
-```csharp
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Runtime.InteropServices;
+- In `.github/workflows/build-artifacts.yml`, added .NET/Fable setup and generation before:
+  - Android Flutter build: `GSTFlow.Dart` → `flutter_app/lib/fable_dart`
+  - Windows Flutter build: `GSTFlow.Dart` → `flutter_app/lib/fable_dart`
+  - Web Playwright build: `GSTFlow.Wasm` → `playground/src/fable`
+- Corrected `.github/workflows/build-android.yml` and `.github/workflows/release.yml` to build the `GSTFlow.Dart` project into the import path the Flutter app actually uses. The prior Core/Rules output paths were not consumed by the app.
 
-namespace GSTFlow.Native;
+### Playwright test alignment
 
-// 1. DEFINE THE SOURCE GENERATOR CONTEXT
-// This tells the compiler to generate AOT-safe serialization code at build time.
-// CRITICAL: We force CamelCase to match the F#/Wasm output exactly.
-[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
-[JsonSerializable(typeof(VerdictEnvelope))]
-[JsonSerializable(typeof(Invoice))] // Add any other types passed across the FFI boundary
-internal partial class CanonFlowJsonContext : JsonSerializerContext { }
+- Removed the click on `Raw JSON`, which is not rendered by the UI.
+- The test now verifies the visible `Govt JSON Playground` entry point; JSON mode is already the default.
 
-public static class NativeInterface 
-{
-    [UnmanagedCallersOnly(EntryPoint = "verify_gst_invoice")]
-    public static IntPtr VerifyGstInvoice(IntPtr jsonPtr, int length)
-    {
-        try 
-        {
-            // ... (your existing byte reading and F# Core invocation logic) ...
-            var verdict = CanonFlow.Core.Verify(invoice);
+## Files changed
 
-            // 2. FIX LINE 53: USE THE SOURCE GENERATOR
-            // BEFORE (Fails AOT): JsonSerializer.Serialize(verdict, options);
-            // AFTER (AOT Safe):
-            byte[] jsonBytes = JsonSerializer.SerializeToUtf8Bytes(
-                verdict, 
-                CanonFlowJsonContext.Default.VerdictEnvelope
-            );
-            
-            // ... (your existing memory allocation and return logic) ...
-        }
-        catch (Exception ex) { /* ... */ }
-    }
-}
-```
-*Applying this fix will immediately resolve the `Build Windows EXE` failure and the Android `.so` generation failure.*
+- `.github/workflows/build-artifacts.yml`
+- `.github/workflows/build-android.yml`
+- `.github/workflows/release.yml`
+- `flutter_app/lib/invoice_parser.dart`
+- `flutter_app/pubspec.yaml`
+- `flutter_app/test/engine_test.dart`
+- `playground/e2e/invoice.spec.ts`
 
----
+## Validation completed
 
-### 2. The Playwright Failure: The "Trust String" & Casing Drift
-**The Error:**
-`Test Web Gateway (Playwright)` failed (Exit Code 1). 
-Your commit message was: `test(web): update playwright tests for Phase 0 trust string changes`. You updated the UI text, but the test still failed.
+- All edited workflow files parse as YAML.
+- `git diff --check` passes for the fix set.
+- Static checks confirm the four-argument `TaxAmount` call, valid GSTIN fixture, correct Playwright selector, and Fable generation commands.
+- GSTIN checksum verification confirms the new fixture is valid and the replaced fixture is invalid.
 
-**The Cause:**
-The Playwright test is likely running an **Agreement Test** (comparing the output of the Web Wasm engine against the Native CLI engine). 
-*   Before NativeAOT, your CLI might have outputted PascalCase JSON (`{"Status": "Pass", "TaxAmount": 100}`).
-*   Fable/Wasm typically outputs **camelCase** (`{"status": "Pass", "taxAmount": 100}`).
-*   If your new `CanonFlowJsonContext` defaults to PascalCase, the CLI and Wasm outputs will no longer match byte-for-byte, causing the Playwright assertion to fail.
+## Verification still required on GitHub
 
-**The Fix:**
-1.  Ensure the `[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]` attribute is applied (as shown in the code block above). This forces the Native CLI to output camelCase, perfectly matching the Fable Wasm output.
-2.  Verify your Playwright selector. If you added a "Phase 0 Trust String" (e.g., `<div class="trust-badge">CanonFlow Verified</div>`), ensure the Playwright test is waiting for that specific network idle state or DOM element before asserting the JSON payload.
+This environment does not have Flutter or .NET installed, so full Android, Windows, and Playwright builds could not be executed locally. After committing and pushing, rerun the linked workflow and verify all three jobs complete successfully.
 
----
+## Scope note
 
-### 3. CI/CD Hygiene: Node.js 20 Deprecation Warnings
-**The Warning:**
-> `Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24...`
-
-**The Fix:**
-GitHub deprecated Node 20 for Actions runners in late 2025. While these are currently warnings, they clutter the logs and can cause silent failures in strict environments. Update your `.github/workflows/*.yml` files to use the latest action tags that support Node 24:
-
-```yaml
-# Update these to their latest v4/v5 versions
-- uses: actions/checkout@v4       # (Ensure it's the latest v4 patch)
-- uses: actions/setup-dotnet@v4   # (Ensure it's the latest v4 patch)
-- uses: actions/setup-node@v4     # (Ensure it's the latest v4 patch)
-- uses: actions/setup-java@v4     # (Upgrade from v3 to v4)
-```
-
----
-
-### Summary of Next Steps
-
-1.  **Commit the `CanonFlowJsonContext` Source Generator** to `NativeInterface.cs`. This is the magic bullet that fixes the Windows and Android builds.
-2.  **Verify the JSON Naming Policy** is set to `CamelCase` to ensure the CLI and Wasm outputs match, which will fix the Playwright Agreement Test.
-3.  **Bump the GitHub Actions** versions to clear the Node 20 deprecation warnings.
-
-Push these changes, and the pipeline will turn green. You have successfully survived the NativeAOT "Reflection Trap"—the final boss of .NET cross-compilation.
+The pre-existing local change in `.github/workflows/ci.yml` was deliberately not modified.
