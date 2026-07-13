@@ -32,7 +32,9 @@ Renowned for combining functional programming rigor (**F# / .NET NativeAOT**), c
 
 ### 4. Strategic Multi-Channel Platform Design ("The Offline Trinity")
 * **Web Gateway:** Zero-install Wasm/JS client playground for public preflight verification.
-* **Windows Desktop Heavy-Lifter:** The enterprise CA/CFO workhorse with NativeAOT speed, DuckDB analytics, and local PDF AI extraction.
+* **Windows Desktop Heavy-Lifter (Dual-Mode GUI / TUI "Nuclear Option"):** Engineered a dual-execution desktop engine:
+  * *GUI Mode:* High-fidelity **Avalonia UI** visual inspection and interactive CFO auditing.
+  * *TUI Mode (Terminal "Nuclear Option"):* High-throughput interactive ASCII terminal dashboard (`Spectre.Console`) streaming bulk 10,000+ invoice audits. Pairs the bundled **`llama.cpp` local LLM** as an air-gapped terminal copilot that translates natural-language forensic queries into optimized **DuckDB SQL** over `.cff` Avro ledgers.
 * **Two-Tier Mobile Architecture:**
   * *GSTFlow Lite:* Ultra-lightweight (<10MB) Wasm wrapper for speed and instant offline validation on budget devices.
   * *GSTFlow Pro:* Native **Avalonia UI (.NET 10 / F#)** execution maintaining 128-bit Decimal precision, offline camera e-Invoice QR scanning (`mobile_scanner`), embedded DuckDB, and air-gapped Avro export.
