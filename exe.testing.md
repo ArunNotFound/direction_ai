@@ -50,3 +50,24 @@ Run the native executable against the 10,000 JSON invoices. We expect it to proc
 The user is here to *facilitate* and *human test*. Do the heavy lifting, run the commands, and parse the outcomes for them. If the build fails or acts weird on Windows, use your tools to fix it in place.
 
 Good luck!
+
+# Appendix: NativeAOT Benchmark Findings
+
+## 1. Setup & Mock Generation
+- **Source Sync**: The Windows environment was successfully synchronized with the latest `main` branch.
+- **Data Generation**: 10,000 randomized JSON mock invoices were generated successfully in `E:\github\CanonFlowFoundation\GSTFlow\mock_10k_invoices`.
+
+## 2. Compilation Results
+- **NativeAOT Build**: The CLI project (`GSTFlow.Cli`) was compiled with `/p:PublishAot=true` using `.NET 10.0`. 
+- **Warnings**: The build succeeded but emitted several standard IL Trim and AOT warnings related to `System.Text.Json.JsonSerializer.Serialize` (IL2026/IL3050).
+
+## 3. Runtime Benchmarking
+- **Execution Failure**: When running the compiled native executable against the 10,000 invoices, the application crashes immediately at runtime with:
+  ```
+  'Microsoft.FSharp.Core.PrintfImpl+Specializations3[System.IO.TextWriter,Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit].CaptureFinal2[System.Int32,System.String](Microsoft.FSharp.Core.PrintfImpl+Step[])' is missing native code. MethodInfo.MakeGenericMethod() is not compatible with AOT compilation.
+  ```
+- **Root Cause Analysis (Updated)**: We successfully replaced the reflection-based `%A` formatters, but the F# `FSharp.Core.PrintfImpl` engine still throws exceptions for standard `sprintf` interpolations (such as `%s`) under strict NativeAOT constraints. This happens heavily during the CSV string generation in the batch validation logic.
+
+## Recommendations
+1. **String Formatting**: To successfully benchmark the NativeAOT executable, we must eliminate all uses of `sprintf` and `printfn` in the hot paths, and instead rely on standard .NET `String.Concat` or string interpolations (`$"{x}"`) which compile to NativeAOT-friendly `String.Format`.
+2. **JSON**: Migrate `System.Text.Json` to use Source Generators (`[<JsonSerializable>]`).
