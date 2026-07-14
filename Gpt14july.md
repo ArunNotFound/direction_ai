@@ -63,7 +63,7 @@ That is useful regression protection, though it is not yet legal validation or a
 
 ## P0 findings — must fix before any trust or production claim
 
-### P0.1 — `Unknown` outranks `Fail`
+### P0.1 — `Unknown` outranks `Fail` ✅ FIXED
 
 `RuleOutcome` is declared as `Pass | Warning | Fail | Unknown`, then overall outcome is computed with F# `List.max`. F# comparison follows union-case order, so `Unknown` outranks `Fail`.
 
@@ -77,7 +77,7 @@ This is a release blocker. Define severity explicitly, for example `Fail > Unkno
 
 Evidence: [`RuleOutcome` declaration](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b7f1ddea178e9abb99951797cf61b78a62d36/GSTFlow.Core/Library.fs), [`List.max` aggregation](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b7f1ddea178e9abb99951797cf61b78a62d36/GSTFlow.Rules/Library.fs), and [`--emit-envelope`](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b7f1ddea178e9abb99951797cf61b78a62d36/GSTFlow.Cli/Program.fs).
 
-### P0.2 — ₹1 intrastate error can still pass
+### P0.2 — ₹1 intrastate error can still pass ✅ FIXED
 
 The engine allows each CGST and SGST component to differ by up to `₹0.50` because it fails only when the difference is `> 0.5m`. Therefore CGST can be wrong by ₹0.50 and SGST wrong by ₹0.50—a combined ₹1.00 discrepancy—and both checks pass.
 
@@ -85,7 +85,7 @@ The engine allows each CGST and SGST component to differ by up to `₹0.50` beca
 
 Evidence: [`validateItem`](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b7f1ddea178e9abb99951797cf61b78a62d36/GSTFlow.Rules/Library.fs). Microsoft’s [`Decimal` documentation](https://learn.microsoft.com/en-us/dotnet/api/system.decimal?view=net-10.0) also makes clear that decimal arithmetic still requires rounding decisions.
 
-### P0.3 — Section 170 is still applied to the wrong base
+### P0.3 — Section 170 is still applied to the wrong base ✅ FIXED
 
 The rule calculates `totalInvoiceValue = taxable value + taxes + cess` and warns when the entire invoice value is fractional. Section 170 concerns rounding amounts of tax, interest, penalty, fine, or other sums payable/refundable/due—not a general command to round the taxable base plus tax total on every invoice.
 
@@ -93,7 +93,7 @@ The current warning text and test canonize an overbroad interpretation. Remove t
 
 Primary reference: [Central Goods and Services Tax Act, 2017](https://www.indiacode.nic.in/handle/123456789/15689).
 
-### P0.4 — The repository has not completed the no-FFI/no-Flutter migration
+### P0.4 — The repository has not completed the no-FFI/no-Flutter migration ✅ FIXED
 
 The Avalonia desktop path is managed, but the solution still contains `GSTFlow.Native`, including `Marshal.PtrToStringUTF8`, unmanaged allocation/freeing, and `UnmanagedCallersOnly`. Old workflows still try to build the deleted `GSTFlow.Dart` and Flutter applications using a hand-written Dart `double` decimal shim.
 
@@ -101,7 +101,7 @@ Therefore the repository is not yet “100% Avalonia/.NET” as a whole. Remove 
 
 Evidence: [`GSTFlow.Native`](https://github.com/CanonFlowFoundation/GSTFlow/tree/278b7f1ddea178e9abb99951797cf61b78a62d36/GSTFlow.Native), [`GSTFlow.slnx`](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b7f1ddea178e9abb99951797cf61b78a62d36/GSTFlow.slnx), and [obsolete artifact workflow](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b7f1ddea178e9abb99951797cf61b78a62d36/.github/workflows/build-artifacts.yml).
 
-### P0.5 — CFF “complete” claims are not implemented
+### P0.5 — CFF “complete” claims are not implemented ✅ FIXED
 
 Current code does not create a `.cff` ZIP, Avro file, Parquet file, attachment tree, schema, or verifiable signature. `generateCffManifestJson` returns a JSON string that declares files which are never created. The rule-pack digest is the fixed SHA-256 of an empty payload. `created_at` makes output non-deterministic.
 
@@ -111,7 +111,7 @@ The README and standing report must call these designs/experiments, not complete
 
 Evidence: [`CffPackager`](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b7f1ddea178e9abb99951797cf61b78a62d36/GSTFlow.Emit/Library.fs), [`NativeColumnar.fs`](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b7f1ddea178e9abb99951797cf61b78a62d36/GSTFlow.Emit/NativeColumnar.fs), and the [Apache Avro specification](https://avro.apache.org/docs/1.12.0/specification/).
 
-### P0.6 — QR “signature verification” is a hard-coded success
+### P0.6 — QR “signature verification” is a hard-coded success ✅ FIXED
 
 `decodeOfflineQr` ignores its input and returns fixed invoice data with `SignatureVerified = true`. The UI/CLI then prints “100% offline signature verified.” This is a dangerous trust claim and must be removed until a genuine NIC payload parser, certificate/key trust chain, signature algorithm, negative vectors, and revocation/update policy exist.
 
