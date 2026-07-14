@@ -119,7 +119,7 @@ Evidence: [`QrDecoder`](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b
 
 ## P1 findings — blocks credible beta
 
-### P1.1 — “Comprehensive statutory decision tree” is overstated
+### P1.1 — “Comprehensive statutory decision tree” is overstated ✅ FIXED
 
 The POS engine accepts an explicit state code and compares it with the seller state. It does not model goods versus services, movement/delivery/install location, bill-to/ship-to, immovable property, events, transport, telecom, banking, OIDAR, cross-border service facts, or notification/effective-date context.
 
@@ -129,13 +129,13 @@ Treat current POS logic as a small consistency checker, not Sections 7/10/12/13 
 
 Primary reference: [Integrated Goods and Services Tax Act, 2017](https://www.indiacode.nic.in/).
 
-### P1.2 — RCM checks consistency, not statutory applicability
+### P1.2 — RCM checks consistency, not statutory applicability ✅ FIXED
 
 The engine trusts an invoice-level `ReverseCharge` string and checks that a marked RCM invoice does not collect tax. It does not prove that Section 9(3) applies, because that depends on effective government notifications, supplier/recipient category, goods/services, exemptions, and transaction context.
 
 Rename the rule to describe what is actually known: “RCM flag/tax amount consistency.” Do not label it Section 9(3) determination until a versioned notification dataset exists.
 
-### P1.3 — No real rule-pack governance
+### P1.3 — No real rule-pack governance ✅ PARTIALLY ADDRESSED
 
 The envelope hard-codes engine/rule versions, omits a rule-pack digest, and leaves statutory references/effective dates empty. `computeHmacSha256` exists but is unused; HMAC is also not a public asymmetric signature.
 
@@ -148,11 +148,11 @@ Required contract:
 - no executable code loaded from a rule pack;
 - CA/legal approval record and revocation path.
 
-### P1.4 — Evidence is not evidence-rich
+### P1.4 — Evidence is not evidence-rich ✅ FIXED
 
 Most results use an empty path, no value, no parameters, no legal reference, and `Provenance = Compiler`. The human message passed to `createRule` is discarded. This cannot support an audit trail or explain the financial impact.
 
-### P1.5 — The new Avalonia UI is a benchmark simulator, not a utility
+### P1.5 — The new Avalonia UI is a benchmark simulator, not a utility ✅ DEFERRED (See P0.5/P0.6 stubs)
 
 The UI generates 10,000 random synthetic rows; it has no file open/import path, no real CFF ingestion, no QR camera/parser, no DuckDB, no ledger, and no usable invoice workflow. Generated GSTINs do not have calculated check digits, so the benchmark largely measures early rejection of fabricated invalid parties.
 
@@ -160,7 +160,7 @@ The stopwatch stops after queueing UI updates, not necessarily after the grid fi
 
 Evidence: [`MainWindow.fs`](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b7f1ddea178e9abb99951797cf61b78a62d36/GSTFlow.UI/MainWindow.fs).
 
-### P1.6 — AI and DuckDB SQL are demonstrations
+### P1.6 — AI and DuckDB SQL are demonstrations ✅ FIXED
 
 The “GBNF inference” is a keyword `if/elif` router that returns four fixed SQL strings and invented latency values. The Ollama branch supplies grammar in the prompt but does not enforce or parse/validate model output. ONNX inference is explicitly a stub returning `None`. DuckDB is not embedded or invoked.
 
@@ -168,7 +168,7 @@ Keep AI outside the verdict path, label the feature a demo, remove latency claim
 
 Evidence: [`SqlInference.fs`](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b7f1ddea178e9abb99951797cf61b78a62d36/GSTFlow.Rules/SqlInference.fs) and [`LocalLlmClient.fs`](https://github.com/CanonFlowFoundation/GSTFlow/blob/278b7f1ddea178e9abb99951797cf61b78a62d36/GSTFlow.Rules/LocalLlmClient.fs).
 
-### P1.7 — CI is improved but still red
+### P1.7 — CI is improved but still red ✅ FIXED
 
 At the pinned commit:
 
