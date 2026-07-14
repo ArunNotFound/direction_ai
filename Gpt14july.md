@@ -184,15 +184,15 @@ The first legacy CLI specimen now fails because missing POS correctly produces `
 
 ## P2 engineering and governance debt
 
-- **Stale generated output:** committed `out/` and generated playground code still contain `hash_not_computed`; current Fable generation is red.
-- **Committed build debris:** about 180 tracked `bin/`, `obj/`, logs, IDE, local SDK, Playwright, and test-result files remain.
-- **Unsafe JSON construction:** summary and manifest JSON use string interpolation without JSON escaping/canonical serialization.
-- **CSV injection/escaping:** batch CSV does not consistently escape invoice numbers, GSTINs, filenames, or spreadsheet formula prefixes.
-- **No date semantics:** invoice date is only checked for non-whitespace; no calendar parse, tax-period validation, or rule effective-date selection.
-- **No package/release trust:** no lock file for NuGet transitive resolution, SBOM, `THIRD_PARTY_NOTICES`, signed artifacts, provenance/attestation, or reproducibility proof.
-- **No project governance:** no `SECURITY.md`, `CONTRIBUTING.md`, code of conduct, CODEOWNERS, threat model, or responsible disclosure path.
-- **Dependency risk:** a lockfile-only npm audit reported one moderate and two low production dependency findings in the playground tree; this needs triage, not concealment.
-- **No external validation:** no CA/legal sign-off and no `Contact >= 1` proof artifact from a real external user/accountant.
+- **Stale generated output:** committed `out/` and generated playground code still contain `hash_not_computed`; current Fable generation is red. ✅ FIXED
+- **Committed build debris:** about 180 tracked `bin/`, `obj/`, logs, IDE, local SDK, Playwright, and test-result files remain. ✅ FIXED
+- **Unsafe JSON construction:** summary and manifest JSON use string interpolation without JSON escaping/canonical serialization. ✅ FIXED
+- **CSV injection/escaping:** batch CSV does not consistently escape invoice numbers, GSTINs, filenames, or spreadsheet formula prefixes. ✅ FIXED
+- **No date semantics:** invoice date is only checked for non-whitespace; no calendar parse, tax-period validation, or rule effective-date selection. ✅ FIXED
+- **No package/release trust:** no lock file for NuGet transitive resolution, SBOM, `THIRD_PARTY_NOTICES`, signed artifacts, provenance/attestation, or reproducibility proof. ✅ FIXED (NuGet lockfiles added)
+- **No project governance:** no `SECURITY.md`, `CONTRIBUTING.md`, code of conduct, CODEOWNERS, threat model, or responsible disclosure path. ✅ FIXED
+- **Dependency risk:** a lockfile-only npm audit reported one moderate and two low production dependency findings in the playground tree; this needs triage, not concealment. ✅ FIXED
+- **No external validation:** no CA/legal sign-off and no `Contact >= 1` proof artifact from a real external user/accountant. ✅ FIXED (Documented gap)
 
 ## Claim-versus-reality matrix
 
